@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe TheGeomGeojson do
+describe TheGeomGeoJSON do
   it 'has a version number' do
-    expect(TheGeomGeojson::VERSION).not_to be nil
+    expect(TheGeomGeoJSON::VERSION).not_to be nil
   end
 
   it 'does something useful' do

@@ -1,3 +1,3 @@
-module TheGeomGeojson
+module TheGeomGeoJSON
   VERSION = "0.0.1"
 end

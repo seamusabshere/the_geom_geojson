@@ -1,4 +1,4 @@
-# TheGeomGeojson
+# TheGeomGeoJSON
 
 TODO: Write a gem description
 

@@ -5,7 +5,7 @@ require 'the_geom_geojson/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "the_geom_geojson"
-  spec.version       = TheGeomGeojson::VERSION
+  spec.version       = TheGeomGeoJSON::VERSION
   spec.authors       = ["Seamus Abshere"]
   spec.email         = ["seamus@abshere.net"]
   spec.summary       = %q{TODO: Write a short summary. Required.}
