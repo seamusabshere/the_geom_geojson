@@ -1,5 +1,5 @@
-require "the_geom_geojson/version"
+require_relative 'the_geom_geojson/version'
 
 module TheGeomGeoJSON
-  # Your code goes here...
+  Dirty = Class.new(RuntimeError)
 end
