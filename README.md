@@ -6,6 +6,8 @@ For PostGIS/PostgreSQL and ActiveRecord, provides `the_geom_geojson` getter and 
 
 Web mapping libraries like [Leaflet](http://leafletjs.com/) often don't support PostGIS's native [Well-Known Binary (WKB) and Well-Known Text (WKT)](http://postgis.net/docs/using_postgis_dbmanagement.html#OpenGISWKBWKT) representation, but they do support [GeoJSON](http://geojson.org/), so this library helps translate between the two.
 
+<img src="https://www.nyu.edu/greyart/exhibits/cisneros/images/garcianew.jpg" alt="Composición constructiva 16" />
+
 ## Requirements
 
 * [PostgreSQL](postgresql.org) >=9
