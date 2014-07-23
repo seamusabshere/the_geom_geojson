@@ -1,3 +1,9 @@
+0.0.2 / 2014-07-22
+
+* Enhancements
+
+  * Support alternate primary keys set on ActiveRecord with `self.primary_key = X`
+
 0.0.1 / 2014-07-17
 
 initial release!

@@ -27,7 +27,7 @@ module TheGeomGeoJSON
           memo << 'the_geom = ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)'                                  if has_the_geom
           memo << ',' if has_the_geom && has_the_geom_webmercator
           memo << 'the_geom_webmercator  = ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON(?), 4326), 3857)' if has_the_geom_webmercator
-          memo << ' WHERE id = ?'
+          memo << " WHERE #{model.quoted_primary_key} = ?"
           memo.join.freeze
         end)
         model.send :sanitize_sql_array, [sql, the_geom_geojson, the_geom_geojson, id]
@@ -48,7 +48,7 @@ module TheGeomGeoJSON
         @the_geom_geojson_change
       elsif id
         self.class.connection_pool.with_connection do |c|
-          c.select_value "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE id = #{c.quote(id)} LIMIT 1"
+          c.select_value "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
         end
       end
     end

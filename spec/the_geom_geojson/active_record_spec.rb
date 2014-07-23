@@ -5,10 +5,16 @@ unless ENV['FAST'] == 'true'
   system 'dropdb', '--if-exists', dbname
   system 'createdb', dbname
   system 'psql', dbname, '--command', 'CREATE EXTENSION postgis'
+  system 'psql', dbname, '--command', 'CREATE EXTENSION "uuid-ossp"'
   system 'psql', dbname, '--command', 'CREATE TABLE pets (id serial primary key, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
+  system 'psql', dbname, '--command', 'CREATE TABLE pet_alt_ids (alt_id serial primary key, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
+  system 'psql', dbname, '--command', 'CREATE TABLE pet_text_ids (id text unique not null, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
+  system 'psql', dbname, '--command', 'CREATE TABLE pet_uuids (id uuid unique not null, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
+  system 'psql', dbname, '--command', 'CREATE TABLE pet_auto_uuids (id uuid unique not null default uuid_generate_v4(), the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
 end
 
 require 'active_record'
+require 'securerandom'
 
 ActiveRecord::Base.establish_connection "postgresql://127.0.0.1/#{dbname}"
 
@@ -20,6 +26,30 @@ require 'the_geom_geojson/active_record'
 
 class Pet < ActiveRecord::Base
   include TheGeomGeoJSON::ActiveRecord
+end
+
+class PetAltId < ActiveRecord::Base
+  include TheGeomGeoJSON::ActiveRecord
+  self.primary_key = 'alt_id'
+end
+
+class PetTextId < ActiveRecord::Base
+  include TheGeomGeoJSON::ActiveRecord
+  self.primary_key = 'id'
+end
+
+class PetUuid < ActiveRecord::Base
+  include TheGeomGeoJSON::ActiveRecord
+  self.primary_key = 'id'
+end
+
+class PetAutoUuid < ActiveRecord::Base
+  include TheGeomGeoJSON::ActiveRecord
+  self.primary_key = 'id'
+  
+  before_save do
+    self.id ||= SecureRandom.uuid
+  end
 end
 
 if ENV['PRY'] == 'true'
@@ -61,43 +91,95 @@ describe TheGeomGeoJSON do
       end
     end
 
-    describe "creating" do
-      before do
-        @pet = Pet.create! the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+    shared_examples 'different states of persistence' do
+      describe "creating" do
+        before do
+          @pet = create_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+        end
+        it_behaves_like 'the_geom_geojson=(geojson)'
       end
-      it_behaves_like 'the_geom_geojson=(geojson)'
+
+      describe "building and saving" do
+        before do
+          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet.save!
+        end
+        it_behaves_like 'the_geom_geojson=(geojson)'
+      end
+
+      describe "modifying" do
+        before do
+          @pet = create_pet
+          @pet.the_geom_geojson = TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet.save!
+        end
+        it_behaves_like 'the_geom_geojson=(geojson)'
+      end
+
+      describe "building (without saving)" do
+        before do
+          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+        end
+        it "raises exception if you try to access the_geom" do
+          expect{@pet.the_geom}.to raise_error(TheGeomGeoJSON::Dirty)
+        end
+        it "raises exception if you try to access the_geom_webmercator" do
+          expect{@pet.the_geom_webmercator}.to raise_error(TheGeomGeoJSON::Dirty)
+        end
+        it "lets you access the_geom_geojson" do
+          expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+        end
+      end
     end
 
-    describe "building and saving" do
-      before do
-        @pet = Pet.new the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
-        @pet.save!
+    describe "with autoincrement id" do
+      def create_pet(attrs = {})
+        Pet.create! attrs
       end
-      it_behaves_like 'the_geom_geojson=(geojson)'
+      def build_pet(attrs = {})
+        Pet.new attrs
+      end
+      it_behaves_like 'different states of persistence'
     end
 
-    describe "modifying" do
-      before do
-        @pet = Pet.create!
-        @pet.the_geom_geojson = TheGeomGeoJSON::EXAMPLES[:burlington_point]
-        @pet.save!
+    describe "with alt id" do
+      def create_pet(attrs = {})
+        PetAltId.create! attrs
       end
-      it_behaves_like 'the_geom_geojson=(geojson)'
+      def build_pet(attrs = {})
+        PetAltId.new attrs
+      end
+      it_behaves_like 'different states of persistence'
     end
 
-    describe "building (without saving)" do
-      before do
-        @pet = Pet.new the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+    describe "with auto-generating uuid" do
+      def create_pet(attrs = {})
+        PetAutoUuid.create! attrs
       end
-      it "raises exception if you try to access the_geom" do
-        expect{@pet.the_geom}.to raise_error(TheGeomGeoJSON::Dirty)
+      def build_pet(attrs = {})
+        PetAutoUuid.new attrs
       end
-      it "raises exception if you try to access the_geom_webmercator" do
-        expect{@pet.the_geom_webmercator}.to raise_error(TheGeomGeoJSON::Dirty)
+      it_behaves_like 'different states of persistence'
+    end
+
+    describe "with text id" do
+      def create_pet(attrs = {})
+        PetTextId.create! attrs.reverse_merge(id: rand.to_s)
       end
-      it "lets you access the_geom_geojson" do
-        expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+      def build_pet(attrs = {})
+        PetTextId.new attrs.reverse_merge(id: rand.to_s)
       end
+      it_behaves_like 'different states of persistence'
+    end
+
+    describe "with uuid id" do
+      def create_pet(attrs = {})
+        PetUuid.create! attrs.reverse_merge(id: SecureRandom.uuid)
+      end
+      def build_pet(attrs = {})
+        PetUuid.new attrs.reverse_merge(id: SecureRandom.uuid)
+      end
+      it_behaves_like 'different states of persistence'
     end
 
   end
