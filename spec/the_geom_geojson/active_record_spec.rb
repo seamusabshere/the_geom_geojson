@@ -46,7 +46,7 @@ end
 class PetAutoUuid < ActiveRecord::Base
   include TheGeomGeoJSON::ActiveRecord
   self.primary_key = 'id'
-  
+
   before_save do
     self.id ||= SecureRandom.uuid
   end
@@ -66,14 +66,14 @@ describe TheGeomGeoJSON do
     # ----------------------------------------------------
     #  0101000020E61000005C2041F1634C52C085EB51B81E3D4640
     # (1 row)
-    let(:the_geom_expected) { '0101000020E61000005C2041F1634C52C085EB51B81E3D4640' }
+    let(:the_geom_expected) { '0101000020E61000003108AC1C5A4C52C0931804560E3D4640' }
 
     # # select st_transform(st_setsrid(st_geomfromgeojson('{"type":"Point","coordinates":[-73.1936,44.4775]}'),4326), 3857);
     #                     st_transform
     # ----------------------------------------------------
     #  0101000020110F000011410192E8145FC137D58F0ECD215541
     # (1 row)
-    let(:the_geom_webmercator_expected) { '0101000020110F000011410192E8145FC137D58F0ECD215541' }
+    let(:the_geom_webmercator_expected) { '0101000020110F0000C22156DFD7145FC10858288EB9215541' }
 
     before do
       Pet.delete_all
