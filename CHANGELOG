@@ -1,3 +1,9 @@
+0.0.3 / 2014-10-08
+
+* Enhancements
+
+  * Simplify geojson examples - thanks @ihough https://github.com/seamusabshere/the_geom_geojson/pull/1 !
+
 0.0.2 / 2014-07-22
 
 * Enhancements
