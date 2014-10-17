@@ -46,10 +46,9 @@ module TheGeomGeoJSON
     def the_geom_geojson
       if @the_geom_geojson_dirty
         @the_geom_geojson_change
-      elsif id
-        self.class.connection_pool.with_connection do |c|
-          c.select_value "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
-        end
+      elsif the_geom
+        parser = RGeo::WKRep::WKBParser.new nil, support_ewkb: true
+        JSON.dump RGeo::GeoJSON.encode(parser.parse(the_geom))
       end
     end
 

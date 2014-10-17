@@ -1,3 +1,9 @@
+0.0.5 / 2014-10-17
+
+* Enhancements
+
+  * Don't go to PostGIS database to convert WKB->GeoJSON, use rubyland RGeo instead.
+
 0.0.4 / 2014-10-09
 
 * Enhancements
