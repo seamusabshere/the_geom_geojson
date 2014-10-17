@@ -47,8 +47,7 @@ module TheGeomGeoJSON
       if @the_geom_geojson_dirty
         @the_geom_geojson_change
       elsif the_geom
-        parser = RGeo::WKRep::WKBParser.new nil, support_ewkb: true
-        JSON.dump RGeo::GeoJSON.encode(parser.parse(the_geom))
+        TheGeomGeoJSON.ewkb_to_geojson the_geom
       end
     end
 
