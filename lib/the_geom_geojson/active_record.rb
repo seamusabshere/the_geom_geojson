@@ -51,12 +51,9 @@ module TheGeomGeoJSON
       elsif preselected = read_attribute(:the_geom_geojson)
         preselected
       elsif the_geom
-        started_at = Time.now
-        memo = TheGeomGeoJSON.ewkb_to_geojson the_geom
-        if (elapsed = Time.now - started_at) > 0.1
-          $stderr.puts "[the_geom_geojson] EWKB->GeoJSON parsing took #{elapsed}s, recommend using #{self.class.name}.with_geojson scope"
+        self.class.connection_pool.with_connection do |c|
+          c.select_value "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
         end
-        memo
       end
     end
 

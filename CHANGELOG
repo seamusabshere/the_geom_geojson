@@ -1,3 +1,9 @@
+0.1.1 / 2014-10-19
+
+* Enhancements
+
+  * Going back to using PostGIS to convert to GeoJSON, clumsier but faster in worse case.
+
 0.1.0 / 2014-10-19
 
 * Breaking changes
