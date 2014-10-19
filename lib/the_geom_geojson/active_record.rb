@@ -3,6 +3,8 @@ module TheGeomGeoJSON
     class << self
       def included(model)
         model.class_eval do
+          scope :with_geojson, -> { select('*', 'ST_AsGeoJSON(the_geom) AS the_geom_geojson') }
+
           after_save do
             if @the_geom_geojson_dirty
               raise "can't update the_geom without an id" if id.nil?
@@ -42,12 +44,19 @@ module TheGeomGeoJSON
       @the_geom_geojson_change = v
     end
 
-    # warning inefficient!
+    
     def the_geom_geojson
       if @the_geom_geojson_dirty
         @the_geom_geojson_change
+      elsif preselected = read_attribute(:the_geom_geojson)
+        preselected
       elsif the_geom
-        TheGeomGeoJSON.ewkb_to_geojson the_geom
+        started_at = Time.now
+        memo = TheGeomGeoJSON.ewkb_to_geojson the_geom
+        if (elapsed = Time.now - started_at) > 0.1
+          $stderr.puts "[the_geom_geojson] EWKB->GeoJSON parsing took #{elapsed}s, recommend using #{self.class.name}.with_geojson scope"
+        end
+        memo
       end
     end
 

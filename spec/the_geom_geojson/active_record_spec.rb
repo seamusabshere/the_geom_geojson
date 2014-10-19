@@ -89,6 +89,20 @@ describe TheGeomGeoJSON do
       it "lets you access the_geom_geojson" do
         expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
       end
+      it "can be loaded from db" do
+        if @pet.persisted?
+          reloaded = pet_model.find @pet.id
+          expect(reloaded.the_geom).to eq(the_geom_expected)
+          expect(reloaded.the_geom_webmercator).to eq(the_geom_webmercator_expected)
+          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+        end
+      end
+      it "can be loaded with .with_geojson scope" do
+        if @pet.persisted?
+          reloaded = pet_model.with_geojson.find @pet.id
+          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+        end
+      end
     end
 
     shared_examples 'different states of persistence' do
@@ -132,37 +146,38 @@ describe TheGeomGeoJSON do
       end
     end
 
+    def create_pet(attrs = {})
+      pet_model.create! attrs
+    end
+    def build_pet(attrs = {})
+      pet_model.new attrs
+    end
+
     describe "with autoincrement id" do
-      def create_pet(attrs = {})
-        Pet.create! attrs
-      end
-      def build_pet(attrs = {})
-        Pet.new attrs
+      def pet_model
+        Pet
       end
       it_behaves_like 'different states of persistence'
     end
 
     describe "with alt id" do
-      def create_pet(attrs = {})
-        PetAltId.create! attrs
-      end
-      def build_pet(attrs = {})
-        PetAltId.new attrs
+      def pet_model
+        PetAltId
       end
       it_behaves_like 'different states of persistence'
     end
 
     describe "with auto-generating uuid" do
-      def create_pet(attrs = {})
-        PetAutoUuid.create! attrs
-      end
-      def build_pet(attrs = {})
-        PetAutoUuid.new attrs
+      def pet_model
+        PetAutoUuid
       end
       it_behaves_like 'different states of persistence'
     end
 
     describe "with text id" do
+      def pet_model
+        PetTextId
+      end
       def create_pet(attrs = {})
         PetTextId.create! attrs.reverse_merge(id: rand.to_s)
       end
@@ -173,6 +188,9 @@ describe TheGeomGeoJSON do
     end
 
     describe "with uuid id" do
+      def pet_model
+        PetUuid
+      end
       def create_pet(attrs = {})
         PetUuid.create! attrs.reverse_merge(id: SecureRandom.uuid)
       end

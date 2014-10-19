@@ -1,6 +1,15 @@
+0.1.0 / 2014-10-19
+
+* Breaking changes
+
+  * Provide .with_geojson scope for faster #the_geom_geojson accesses (RGeo is WAY slower than ST_AsGeoJSON)
+
 * Enhancements
 
+  * Much faster than 0.0.5 if you use .with_geojson scope; unlike 0.0.4, works even if you don't
+  * Opportunistically use read_attribute(:the_geom_geojson) if the user has included it in their SELECT
   * Provide TheGeomGeoJSON.ewkb_to_geojson(ewkb)
+  * Warn when EWKB->GeoJSON parsing is taking too long
 
 0.0.5 / 2014-10-17
 
