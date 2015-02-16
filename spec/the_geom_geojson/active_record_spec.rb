@@ -57,19 +57,8 @@ end
 
 describe TheGeomGeoJSON do
   describe 'ActiveRecord' do
-    # # SELECT ST_SetSRID(ST_GeomFromGeoJSON('{"type":"Point","coordinates":[-73.193,44.477]}'), 4326);
-    #                      st_setsrid
-    # ----------------------------------------------------
-    #  0101000020E61000003108AC1C5A4C52C0931804560E3D4640
-    # (1 row)
-    let(:the_geom_expected) { '0101000020E61000003108AC1C5A4C52C0931804560E3D4640' }
-
-    # # SELECT ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON('{"type":"Point","coordinates":[-73.193,44.477]}'), 4326), 3857);
-    #                     st_transform
-    # ----------------------------------------------------
-    #  0101000020110F0000C22156DFD7145FC10858288EB9215541
-    # (1 row)
-    let(:the_geom_webmercator_expected) { '0101000020110F0000C22156DFD7145FC10858288EB9215541' }
+    let(:the_geom_expected) { '0103000020E6100000010000000600000083C0CAA1454E52C0022B8716D93E46406DE7FBA9F14A52C01F85EB51B83E4640D34D6210584952C0F0A7C64B373946402FDD2406814D52C0D578E926313846402DB29DEFA74E52C04260E5D0223B464083C0CAA1454E52C0022B8716D93E4640' }
+    let(:the_geom_webmercator_expected) { '0103000020110F00000100000006000000213FC2C41A185FC1B8ACA6A9DB2355417F507E9D73125FC1B31193A6B4235541B0E24EDEBB0F5FC1CCA725C4271D5541FACC63CFCC165FC16AE385ECEF1B5541337871BFC1185FC1F8C0EA95701F5541213FC2C41A185FC1B8ACA6A9DB235541' }
 
     before do
       Pet.delete_all
@@ -83,20 +72,23 @@ describe TheGeomGeoJSON do
         expect(@pet.the_geom_webmercator).to eq(the_geom_webmercator_expected)
       end
       it "lets you access the_geom_geojson" do
-        expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+        expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington])
+      end
+      it "lets you access a simplified the_geom_geojson" do
+        expect(@pet.the_geom_geojson(simplify: 0.03).length).to be < @pet.the_geom_geojson.length
       end
       it "can be loaded from db" do
         if @pet.persisted?
           reloaded = pet_model.find @pet.id
           expect(reloaded.the_geom).to eq(the_geom_expected)
           expect(reloaded.the_geom_webmercator).to eq(the_geom_webmercator_expected)
-          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington])
         end
       end
       it "can be loaded with .with_geojson scope" do
         if @pet.persisted?
           reloaded = pet_model.with_geojson.find @pet.id
-          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+          expect(reloaded.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington])
         end
       end
     end
@@ -104,14 +96,14 @@ describe TheGeomGeoJSON do
     shared_examples 'different states of persistence' do
       describe "creating" do
         before do
-          @pet = create_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet = create_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
       end
 
       describe "building and saving" do
         before do
-          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
           @pet.save!
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
@@ -120,7 +112,7 @@ describe TheGeomGeoJSON do
       describe "modifying" do
         before do
           @pet = create_pet
-          @pet.the_geom_geojson = TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet.the_geom_geojson = TheGeomGeoJSON::EXAMPLES[:burlington]
           @pet.save!
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
@@ -128,7 +120,7 @@ describe TheGeomGeoJSON do
 
       describe "building (without saving)" do
         before do
-          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington_point]
+          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
         end
         it "raises exception if you try to access the_geom" do
           expect{@pet.the_geom}.to raise_error(TheGeomGeoJSON::Dirty)
@@ -137,7 +129,7 @@ describe TheGeomGeoJSON do
           expect{@pet.the_geom_webmercator}.to raise_error(TheGeomGeoJSON::Dirty)
         end
         it "lets you access the_geom_geojson" do
-          expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington_point])
+          expect(@pet.the_geom_geojson).to eq(TheGeomGeoJSON::EXAMPLES[:burlington])
         end
       end
     end

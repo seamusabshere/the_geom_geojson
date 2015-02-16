@@ -45,14 +45,19 @@ module TheGeomGeoJSON
     end
 
     
-    def the_geom_geojson
+    def the_geom_geojson(simplify: nil)
       if @the_geom_geojson_dirty
-        @the_geom_geojson_change
-      elsif preselected = read_attribute(:the_geom_geojson)
+        simplify ? raise("can't get simplified the_geom_geojson until you save") : @the_geom_geojson_change
+      elsif !simplify and (preselected = read_attribute(:the_geom_geojson))
         preselected
       elsif the_geom
         self.class.connection_pool.with_connection do |c|
-          c.select_value "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
+          sql = if simplify
+            "SELECT ST_AsGeoJSON(ST_Simplify(the_geom, #{c.quote(simplify)}::float)) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
+          else
+            "SELECT ST_AsGeoJSON(the_geom) FROM #{self.class.quoted_table_name} WHERE #{self.class.quoted_primary_key} = #{c.quote(id)} LIMIT 1"
+          end
+          c.select_value sql
         end
       end
     end
