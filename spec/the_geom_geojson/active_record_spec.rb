@@ -18,10 +18,6 @@ require 'securerandom'
 
 ActiveRecord::Base.establish_connection "postgresql://127.0.0.1/#{dbname}"
 
-ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.tap do |klass|
-  klass::OID.register_type('geometry', klass::OID::Identity.new)
-end
-
 require 'the_geom_geojson/active_record'
 
 class Pet < ActiveRecord::Base
