@@ -41,7 +41,12 @@ module TheGeomGeoJSON
 
     def the_geom_geojson=(v)
       @the_geom_geojson_dirty = true
-      @the_geom_geojson_change = v
+      @the_geom_geojson_change = case v
+      when Hash
+        v.to_json
+      else
+        v
+      end
     end
 
     

@@ -93,17 +93,28 @@ describe TheGeomGeoJSON do
       end
     end
 
+    shared_examples 'something you can set geojson on' do
+      describe 'with json' do
+        let(:input) { TheGeomGeoJSON::EXAMPLES[:burlington] }
+        it_behaves_like 'different states of persistence'
+      end
+      describe 'with a Hash' do
+        let(:input) { JSON.parse TheGeomGeoJSON::EXAMPLES[:burlington] }
+        it_behaves_like 'different states of persistence'
+      end
+    end
+
     shared_examples 'different states of persistence' do
       describe "creating" do
         before do
-          @pet = create_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
+          @pet = create_pet the_geom_geojson: input
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
       end
 
       describe "building and saving" do
         before do
-          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
+          @pet = build_pet the_geom_geojson: input
           @pet.save!
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
@@ -112,7 +123,7 @@ describe TheGeomGeoJSON do
       describe "modifying" do
         before do
           @pet = create_pet
-          @pet.the_geom_geojson = TheGeomGeoJSON::EXAMPLES[:burlington]
+          @pet.the_geom_geojson = input
           @pet.save!
         end
         it_behaves_like 'the_geom_geojson=(geojson)'
@@ -120,7 +131,7 @@ describe TheGeomGeoJSON do
 
       describe "building (without saving)" do
         before do
-          @pet = build_pet the_geom_geojson: TheGeomGeoJSON::EXAMPLES[:burlington]
+          @pet = build_pet the_geom_geojson: input
         end
         it "raises exception if you try to access the_geom" do
           expect{@pet.the_geom}.to raise_error(TheGeomGeoJSON::Dirty)
@@ -145,21 +156,21 @@ describe TheGeomGeoJSON do
       def pet_model
         Pet
       end
-      it_behaves_like 'different states of persistence'
+      it_behaves_like 'something you can set geojson on'
     end
 
     describe "with alt id" do
       def pet_model
         PetAltId
       end
-      it_behaves_like 'different states of persistence'
+      it_behaves_like 'something you can set geojson on'
     end
 
     describe "with auto-generating uuid" do
       def pet_model
         PetAutoUuid
       end
-      it_behaves_like 'different states of persistence'
+      it_behaves_like 'something you can set geojson on'
     end
 
     describe "with text id" do
@@ -172,7 +183,7 @@ describe TheGeomGeoJSON do
       def build_pet(attrs = {})
         PetTextId.new attrs.reverse_merge(id: rand.to_s)
       end
-      it_behaves_like 'different states of persistence'
+      it_behaves_like 'something you can set geojson on'
     end
 
     describe "with uuid id" do
@@ -185,7 +196,7 @@ describe TheGeomGeoJSON do
       def build_pet(attrs = {})
         PetUuid.new attrs.reverse_merge(id: SecureRandom.uuid)
       end
-      it_behaves_like 'different states of persistence'
+      it_behaves_like 'something you can set geojson on'
     end
   end
 
