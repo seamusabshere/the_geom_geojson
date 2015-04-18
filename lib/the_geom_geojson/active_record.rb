@@ -41,15 +41,9 @@ module TheGeomGeoJSON
 
     def the_geom_geojson=(v)
       @the_geom_geojson_dirty = true
-      @the_geom_geojson_change = case v
-      when Hash
-        v.to_json
-      else
-        v
-      end
+      @the_geom_geojson_change = TheGeomGeoJSON.sanitize_geojson v
     end
-
-    
+   
     def the_geom_geojson(simplify: nil)
       if @the_geom_geojson_dirty
         simplify ? raise("can't get simplified the_geom_geojson until you save") : @the_geom_geojson_change

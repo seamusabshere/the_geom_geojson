@@ -102,6 +102,22 @@ describe TheGeomGeoJSON do
         let(:input) { JSON.parse TheGeomGeoJSON::EXAMPLES[:burlington] }
         it_behaves_like 'different states of persistence'
       end
+      describe 'with GeometryCollection json' do
+        let(:input) { TheGeomGeoJSON::EXAMPLES[:burlington_gc] }
+        it_behaves_like 'different states of persistence'
+      end
+      describe 'with GeometryCollection in a Hash' do
+        let(:input) { JSON.parse TheGeomGeoJSON::EXAMPLES[:burlington_gc] }
+        it_behaves_like 'different states of persistence'
+      end
+      describe 'with FeatureCollection json' do
+        let(:input) { TheGeomGeoJSON::EXAMPLES[:burlington_fc] }
+        it_behaves_like 'different states of persistence'
+      end
+      describe 'with FeatureCollection in a Hash' do
+        let(:input) { JSON.parse TheGeomGeoJSON::EXAMPLES[:burlington_fc] }
+        it_behaves_like 'different states of persistence'
+      end
     end
 
     shared_examples 'different states of persistence' do
